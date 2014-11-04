@@ -1,0 +1,108 @@
+[
+["Test the basic node types and behavior with concatenation to make the structure clear"],
+
+["Empty"],
+[{},
+ "cat",
+ ["00", 0]
+],
+
+["Leaf"],
+[{"ffffffff":["deadbeef", 1]},
+ "cat",
+ ["01ffffffffdeadbeef0001", 1]
+],
+
+["Inner with left and right leaf children"],
+[{"ffffffff":["deadbeef", 1],
+  "00000000":["cafebabe", 3]},
+ "cat",
+ ["02 01ffffffffdeadbeef00010001 0100000000cafebabe00030003", 4]
+],
+
+["Inner with collision on first bit"],
+[{"ffffffff":["deadbeef", 1],
+  "80000000":["cafebabe", 3]},
+ "cat",
+ ["02  02 01ffffffffdeadbeef00010001 0180000000cafebabe00030003 0004 000000", 4]
+],
+
+["First two bits collide"],
+[{"ffffffff":["deadbeef", 1],
+  "c0000000":["cafebabe", 3]},
+ "cat",
+ ["02  02 0201ffffffffdeadbeef0001000101c0000000cafebabe00030003 0004 000000 0004  000000", 4]
+],
+
+["Three items"],
+[{"ffffffff":["deadbeef", 1],
+  "bfffffff":["cafebabe", 3],
+  "00000000":["baadf00d", 5]},
+ "cat",
+ ["02  02 01ffffffffdeadbeef00010001 01bfffffffcafebabe00030003 0004 0100000000baadf00d00050005", 9]
+],
+
+["Four items"],
+[{"ffffffff":["deadbeef", 1],
+  "bfffffff":["cafebabe", 3],
+  "40000000":["feedface", 5],
+  "00000000":["baadf00d", 7]},
+ "cat",
+ ["02  02 01ffffffffdeadbeef00010001 01bfffffffcafebabe00030003 0004  02 0140000000feedface00050005 0100000000baadf00d00070007 000c", 16]
+],
+
+
+["Above test cases repeated, but with SHA256 rather than concatenation."],
+
+["Empty"],
+[{},
+ "sha256",
+ ["6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d", 0]
+],
+
+["Leaf"],
+[{"ffffffff":["deadbeef", 1]},
+ "sha256",
+ ["1766320162c83183f5219a0278111a665c5481fc18d4df11d24deeb75ed4cd3b", 1]
+],
+
+["Inner with left and right leaf children"],
+[{"ffffffff":["deadbeef", 1],
+  "00000000":["cafebabe", 3]},
+ "sha256",
+ ["ffc2f4524067927d5a69278a476dc495b4f3422fa4de84eedf14b3ea52d89d1b", 4]
+],
+
+["Inner with collision on first bit"],
+[{"ffffffff":["deadbeef", 1],
+  "80000000":["cafebabe", 3]},
+ "sha256",
+ ["2b66492f76d81dbe9eba68a9d9a118ca8c17a64fd538c6b90ca2b55c7d83cb00", 4]
+],
+
+["First two bits collide"],
+[{"ffffffff":["deadbeef", 1],
+  "c0000000":["cafebabe", 3]},
+ "sha256",
+ ["7e2472e9c0fb39743b1ef8816c38ffee9c1a96b3f5ed025fa1a1d3fbac014e70", 4]
+],
+
+["Three items"],
+[{"ffffffff":["deadbeef", 1],
+  "bfffffff":["cafebabe", 3],
+  "00000000":["baadf00d", 5]},
+ "sha256",
+ ["cf972b8b1d57bed11d4969697ff651f470626a7cc21fb0340ef1c6189e7ba842", 9]
+],
+
+["Four items"],
+[{"ffffffff":["deadbeef", 1],
+  "bfffffff":["cafebabe", 3],
+  "40000000":["feedface", 5],
+  "00000000":["baadf00d", 7]},
+ "sha256",
+ ["6cc9d985a9eb00cde4f85390a6f9c1a261817466f19d424f0e309f372bea5f44", 16]
+],
+
+["keep diffs clean"]
+]
