@@ -9,6 +9,7 @@
 # propagated, or distributed except according to the terms contained in the
 # LICENSE file.
 
+import binascii
 import hashlib
 import io
 
@@ -29,6 +30,10 @@ class SerializationContext:
         """Write a variable-length unsigned integer"""
         raise NotImplementedError
 
+    def write_bytes(self, attr_name, value, expected_length=None):
+        """Write a variable-length byte array"""
+        raise NotImplementedError
+
 class DeserializationContext:
     """Context for deserialization
 
@@ -40,6 +45,9 @@ class DeserializationContext:
         """Write a variable-length unsigned integer"""
         raise NotImplementedError
 
+    def read_bytes(self, attr_name, expected_length=None):
+        """Read a variable-length byte array"""
+        raise NotImplementedError
 
 class StreamSerializationContext(SerializationContext):
     def __init__(self, fd):
@@ -59,6 +67,14 @@ class StreamSerializationContext(SerializationContext):
                 if value <= 0b01111111:
                     break
                 value >>= 7
+
+    def write_bytes(self, attr_name, value, expected_length=None):
+        if expected_length is None:
+            self.write_varuint(None, len(value))
+        else:
+            # FIXME: proper exception
+            assert len(value) == expected_length
+        self.fd.write(value)
 
 class StreamDeserializationContext(DeserializationContext):
     def __init__(self, fd):
@@ -81,6 +97,11 @@ class StreamDeserializationContext(DeserializationContext):
             shift += 7
 
         return value
+
+    def read_bytes(self, attr_name, expected_length=None):
+        if expected_length is None:
+            expected_length = self.read_varuint(None)
+        return self.fd_read(expected_length)
 
 class BytesSerializationContext(StreamSerializationContext):
     def __init__(self):
@@ -107,6 +128,12 @@ class JsonSerializationContext:
         assert attr_name not in self.pairs
         self.pairs[attr_name] = value
 
+    def write_bytes(self, attr_name, value, expected_length=None):
+        assert attr_name not in self.pairs
+        hex_value = binascii.hexlify(value).decode('utf8')
+        self.pairs[attr_name] = hex_value
+
+
 class JsonDeserializationContext:
     """deserialize a human-readable JSON-compatible attribute-value pairs"""
 
@@ -115,6 +142,9 @@ class JsonDeserializationContext:
 
     def read_varuint(self, attr_name):
         return self.pairs[attr_name]
+
+    def read_bytes(self, attr_name, expected_length):
+        return binascii.unhexlify(self.pairs[attr_name].encode('utf8'))
 
 class HashSerializationContext:
     """Serialization context for calculating hashes of objects

@@ -1,0 +1,19 @@
+[
+["00", "", null],
+["01de", "de", null],
+["02dead", "dead", null],
+["03deadbe", "deadbe", null],
+["04deadbeef", "deadbeef", null],
+
+["128 bytes"],
+["8001ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", "ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff", null],
+
+["with an expected length"],
+
+["degenerate case"],
+["", "", 0],
+["00", "00", 1],
+["deadbeef", "deadbeef", 4],
+
+["make diffs clean"]
+]

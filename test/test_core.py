@@ -27,6 +27,19 @@ class boxed_varuint(ImmutableProof):
     def ctx_deserialize(self, ctx):
         object.__setattr__(self, 'i', ctx.read_varuint('i'))
 
+class boxed_bytes(ImmutableProof):
+    """Dummy object with a single bytes attribute"""
+    EXPECTED_LENGTH = None
+
+    def __init__(self, buf):
+        object.__setattr__(self, 'buf', buf)
+
+    def ctx_serialize(self, ctx):
+        ctx.write_bytes('buf', self.buf, self.EXPECTED_LENGTH)
+
+    def ctx_deserialize(self, ctx):
+        object.__setattr__(self, 'buf', ctx.read_bytes('buf', self.EXPECTED_LENGTH))
+
 
 class Test_BytesSerializationContext(unittest.TestCase):
     def test_varuint(self):
@@ -43,6 +56,24 @@ class Test_BytesSerializationContext(unittest.TestCase):
             actual_value = boxed_varuint.deserialize(expected_bytes).i
             self.assertEqual(expected_value, actual_value)
 
+    def test_bytes(self):
+        """Test bytes against vectors"""
+
+        for expected_hex_bytes, expected_hex_value, expected_length in load_test_vectors('valid_bytes.json'):
+            expected_bytes = x(expected_hex_bytes)
+            expected_value = x(expected_hex_value)
+
+            class our_boxed_bytes(boxed_bytes):
+                EXPECTED_LENGTH=expected_length
+
+            # serialize
+            actual_bytes = our_boxed_bytes(expected_value).serialize()
+            self.assertEqual(b2x(expected_bytes), b2x(actual_bytes))
+
+            # deserialize
+            actual_value = our_boxed_bytes.deserialize(expected_bytes).buf
+            self.assertEqual(b2x(expected_value), b2x(actual_value))
+
 class Test_JsonSerializationContext(unittest.TestCase):
     def test_varuint(self):
         for expected_value in (0, 1, 2**32):
@@ -51,3 +82,11 @@ class Test_JsonSerializationContext(unittest.TestCase):
 
             actual_json = boxed_varuint(actual_value).json_serialize()
             self.assertEqual({'i':expected_value}, actual_json)
+
+    def test_bytes(self):
+        for expected_json_value, expected_value in (('', b''), ('deadbeef', b'\xde\xad\xbe\xef')):
+            actual_value = boxed_bytes.json_deserialize({'buf':expected_json_value}).buf
+            self.assertEqual(expected_value, actual_value)
+
+            actual_json = boxed_bytes(actual_value).json_serialize()
+            self.assertEqual({'buf':expected_json_value}, actual_json)
