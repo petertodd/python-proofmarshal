@@ -21,10 +21,10 @@ class boxed_varuint(ImmutableProof):
     def __init__(self, i):
         object.__setattr__(self, 'i', i)
 
-    def ctx_serialize(self, ctx):
+    def _ctx_serialize(self, ctx):
         ctx.write_varuint('i', self.i)
 
-    def ctx_deserialize(self, ctx):
+    def _ctx_deserialize(self, ctx):
         object.__setattr__(self, 'i', ctx.read_varuint('i'))
 
 class boxed_bytes(ImmutableProof):
@@ -34,12 +34,26 @@ class boxed_bytes(ImmutableProof):
     def __init__(self, buf):
         object.__setattr__(self, 'buf', buf)
 
-    def ctx_serialize(self, ctx):
+    def _ctx_serialize(self, ctx):
         ctx.write_bytes('buf', self.buf, self.EXPECTED_LENGTH)
 
-    def ctx_deserialize(self, ctx):
+    def _ctx_deserialize(self, ctx):
         object.__setattr__(self, 'buf', ctx.read_bytes('buf', self.EXPECTED_LENGTH))
 
+class boxed_objs(ImmutableProof):
+    """Object with other objects"""
+
+    def __init__(self, buf, i):
+        object.__setattr__(self, 'buf', boxed_bytes(buf))
+        object.__setattr__(self, 'i', boxed_varuint(i))
+
+    def _ctx_serialize(self, ctx):
+        ctx.write_obj('buf', self.buf)
+        ctx.write_obj('i', self.i)
+
+    def _ctx_deserialize(self, ctx):
+        object.__setattr__(self, 'buf', ctx.read_obj('buf', boxed_bytes))
+        object.__setattr__(self, 'i', ctx.read_obj('i', boxed_varuint))
 
 class Test_BytesSerializationContext(unittest.TestCase):
     def test_varuint(self):
@@ -73,6 +87,25 @@ class Test_BytesSerializationContext(unittest.TestCase):
             # deserialize
             actual_value = our_boxed_bytes.deserialize(expected_bytes).buf
             self.assertEqual(b2x(expected_value), b2x(actual_value))
+
+    def test_objs(self):
+        """Test object serialization"""
+        for expected_hex_serialized_bytes, expected_hex_buf, expected_i in load_test_vectors('valid_boxed_objs.json'):
+            expected_serialized_bytes = x(expected_hex_serialized_bytes)
+            expected_buf = x(expected_hex_buf)
+
+            # serialize
+            actual_serialized_bytes = boxed_objs(expected_buf, expected_i).serialize()
+            self.assertEqual(b2x(expected_serialized_bytes), b2x(actual_serialized_bytes))
+
+            # deserialize
+            actual_boxed_obj = boxed_objs.deserialize(expected_serialized_bytes)
+            self.assertEqual(b2x(expected_buf), b2x(actual_boxed_obj.buf.buf))
+            self.assertEqual(expected_i, actual_boxed_obj.i.i)
+
+            # round-trip
+            roundtrip_serialized_bytes = actual_boxed_obj.serialize()
+            self.assertEqual(b2x(expected_serialized_bytes), b2x(roundtrip_serialized_bytes))
 
 class Test_JsonSerializationContext(unittest.TestCase):
     def test_varuint(self):

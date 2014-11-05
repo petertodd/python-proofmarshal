@@ -34,6 +34,9 @@ class SerializationContext:
         """Write a variable-length byte array"""
         raise NotImplementedError
 
+    def write_obj(self, attr_name, value, serialization_class=None):
+        raise NotImplementedError
+
 class DeserializationContext:
     """Context for deserialization
 
@@ -47,6 +50,9 @@ class DeserializationContext:
 
     def read_bytes(self, attr_name, expected_length=None):
         """Read a variable-length byte array"""
+        raise NotImplementedError
+
+    def read_obj(self, attr_name, serialization_class=None):
         raise NotImplementedError
 
 class StreamSerializationContext(SerializationContext):
@@ -76,6 +82,10 @@ class StreamSerializationContext(SerializationContext):
             assert len(value) == expected_length
         self.fd.write(value)
 
+    def write_obj(self, attr_name, value, serialization_class=None):
+        assert serialization_class is None
+        value.ctx_serialize(self)
+
 class StreamDeserializationContext(DeserializationContext):
     def __init__(self, fd):
         self.fd = fd
@@ -102,6 +112,9 @@ class StreamDeserializationContext(DeserializationContext):
         if expected_length is None:
             expected_length = self.read_varuint(None)
         return self.fd_read(expected_length)
+
+    def read_obj(self, attr_name, serialization_class):
+        return serialization_class.ctx_deserialize(self)
 
 class BytesSerializationContext(StreamSerializationContext):
     def __init__(self):
@@ -167,10 +180,13 @@ class ImmutableProof:
         raise AttributeError('Object is immutable')
 
     def ctx_serialize(self, ctx):
-        pass
+        return self._ctx_serialize(ctx)
 
-    def ctx_deserialize(self, ctx):
-        pass
+    @classmethod
+    def ctx_deserialize(cls, ctx):
+        self = cls.__new__(cls)
+        self._ctx_deserialize(ctx)
+        return self
 
     def serialize(self):
         """Serialize to bytes"""
@@ -182,9 +198,7 @@ class ImmutableProof:
     def deserialize(cls, buf):
         """Deserialize from bytes"""
         ctx = BytesDeserializationContext(buf)
-        self = cls.__new__(cls)
-        self.ctx_deserialize(ctx)
-        return self
+        return cls.ctx_deserialize(ctx)
 
     def json_serialize(self):
         """Serialize to JSON-compatible attribute-value pairs"""
@@ -196,6 +210,4 @@ class ImmutableProof:
     def json_deserialize(cls, pairs):
         """Serialize from JSON-compatible attribute-value pairs"""
         ctx = JsonDeserializationContext(pairs)
-        self = cls.__new__(cls)
-        self.ctx_deserialize(ctx)
-        return self
+        return cls.ctx_deserialize(ctx)
