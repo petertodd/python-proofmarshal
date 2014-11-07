@@ -1,50 +1,50 @@
 [
-["Test the basic node types and behavior with concatenation to make the structure clear"],
+["Test the basic node types and behavior with serialization to make the structure clear"],
 
 ["Empty"],
 [{},
- "cat",
+ "serialize",
  "00"
 ],
 
 ["Leaf"],
 [{"ffffffff":"deadbeef"},
- "cat",
+ "serialize",
  "01ffffffffdeadbeef"
 ],
 
 ["Inner with left and right leaf children"],
 [{"ffffffff":"deadbeef",
   "00000000":"cafebabe"},
- "cat",
+ "serialize",
  "02 01ffffffffdeadbeef 0100000000cafebabe"
 ],
 
 ["Inner with collision on first bit"],
 [{"ffffffff":"deadbeef",
   "80000000":"cafebabe"},
- "cat",
+ "serialize",
  "02  02 01ffffffffdeadbeef 0180000000cafebabe  00"
 ],
 
 ["As above, but opposite side"],
 [{"7fffffff":"deadbeef",
   "00000000":"cafebabe"},
- "cat",
+ "serialize",
  "02  00  02 017fffffffdeadbeef 0100000000cafebabe"
 ],
 
 ["First two bits collide"],
 [{"ffffffff":"deadbeef",
   "c0000000":"cafebabe"},
- "cat",
+ "serialize",
  "02  02 0201ffffffffdeadbeef01c0000000cafebabe 00  00"
 ],
 
 ["As above, but opposite side"],
 [{"3fffffff":"deadbeef",
   "00000000":"cafebabe"},
- "cat",
+ "serialize",
  "02  00 02 00 02013fffffffdeadbeef0100000000cafebabe"
 ],
 
@@ -52,7 +52,7 @@
 [{"ffffffff":"deadbeef",
   "bfffffff":"cafebabe",
   "00000000":"baadf00d"},
- "cat",
+ "serialize",
  "02  02 01ffffffffdeadbeef 01bfffffffcafebabe  0100000000baadf00d"
 ],
 
@@ -61,66 +61,66 @@
   "bfffffff":"cafebabe",
   "40000000":"feedface",
   "00000000":"baadf00d"},
- "cat",
+ "serialize",
  "02  02 01ffffffffdeadbeef 01bfffffffcafebabe  02 0140000000feedface 0100000000baadf00d"
 ],
 
 
-["Above test cases repeated, but with SHA256 rather than concatenation."],
+["Above test cases repeated, but with hashing rather than serialization."],
 
 ["Empty"],
 [{},
- "sha256",
- "6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d"
+ "hash",
+ "ae135d71df652ca291b2025b06165c285aaa0f8ce9609783294d210d371ac8d9"
 ],
 
 ["Leaf"],
 [{"ffffffff":"deadbeef"},
- "sha256",
- "34c502a8d191d52b1f8162da3cf4ddc495967b65979823e999a417dadb4d52f0"
+ "hash",
+ "7b9f6282fa917a0c391bcf96accaad457a40fe31dcd4cdfc17e49dfba311dffb"
 ],
 
 ["Inner with left and right leaf children"],
 [{"ffffffff":"deadbeef",
   "00000000":"cafebabe"},
- "sha256",
- "acaac644e3eaec7e021760cbb34f4d20cfc27d95a638b8164e6d0608355f7f9c"
+ "hash",
+ "65ada255d463e50f569a2ac79a10772d1a3a5262deab2b3ca4bbef466abe8702"
 ],
 
 ["Inner with collision on first bit"],
 [{"ffffffff":"deadbeef",
   "80000000":"cafebabe"},
- "sha256",
- "c7c20d8a855740ddf294c9c678dedf41926e4762a04a124ec2e3ece3e36b883b"
+ "hash",
+ "6d00bce57a2178c209ab6ba3811022d98bd57d8ddc7129f4f9681de6aabc6f71"
 ],
 
 ["As above, but opposite side"],
 [{"7fffffff":"deadbeef",
   "00000000":"cafebabe"},
- "sha256",
- "ed7ba0f6ca8e5bda74b7556f56172ff0cf79b40a60711868e42e85c3d38461a3"
+ "hash",
+ "24f6f56a2b5adb196a18d3589eff608e765a84e03fd85dcce74fbc705bf4c806"
 ],
 
 ["First two bits collide"],
 [{"ffffffff":"deadbeef",
   "c0000000":"cafebabe"},
- "sha256",
- "2df2abef7c47a5cf27966b081dead46342c70d4140b6d5ba6ec5026ccf4dd038"
+ "hash",
+ "a1bca9a7a7cd753583d4acdf524806310c6282e5599a4f50eb88179e44e1397d"
 ],
 
 ["As above, but opposite side"],
 [{"3fffffff":"deadbeef",
   "00000000":"cafebabe"},
- "sha256",
- "ec7648c772caaa9f585918617e75c7059b903fcf3e20b79ce964a0e9bac25a20"
+ "hash",
+ "b73208ee8b5d7fb805ee2277ea269d162f5c80d3314cd1077e1319b3ce6cdecb"
 ],
 
 ["Three items"],
 [{"ffffffff":"deadbeef",
   "bfffffff":"cafebabe",
   "00000000":"baadf00d"},
- "sha256",
- "dbb9e6940cf3811ea8dabae35d2154b6687c4357970bf2435f4cb03173a616e9"
+ "hash",
+ "d393bf646ad233030f3f07be74738bf5a211647376abe81d21df9e03a6f8f635"
 ],
 
 ["Four items"],
@@ -128,8 +128,8 @@
   "bfffffff":"cafebabe",
   "40000000":"feedface",
   "00000000":"baadf00d"},
- "sha256",
- "1d6c68127c8565b43f668fb7859b4caad45903e76e443e67f5b1ba7c65d37ea9"
+ "hash",
+ "663caed10ecde194d948110f53e937e7ea95d8abe2b9f18c85b169ead7613460"
 ],
 
 ["keep diffs clean"]

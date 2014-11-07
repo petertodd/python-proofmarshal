@@ -1,107 +1,107 @@
 [
-["Test the basic node types and behavior with concatenation to make the structure clear"],
+["Test the basic node types and behavior with conserializeenation to make the structure clear"],
 
 ["Empty"],
 [{},
- "cat",
+ "serialize",
  ["00", 0]
 ],
 
 ["Leaf"],
-[{"ffffffff":["deadbeef", 1]},
- "cat",
+[{"ffffffff":"deadbeef0001"},
+ "serialize",
  ["01ffffffffdeadbeef0001", 1]
 ],
 
 ["Inner with left and right leaf children"],
-[{"ffffffff":["deadbeef", 1],
-  "00000000":["cafebabe", 3]},
- "cat",
- ["02 01ffffffffdeadbeef00010001 0100000000cafebabe00030003", 4]
+[{"ffffffff":"deadbeef0001",
+  "00000000":"cafebabe0003"},
+ "serialize",
+ ["02 01ffffffffdeadbeef0001 0100000000cafebabe0003", 4]
 ],
 
 ["Inner with collision on first bit"],
-[{"ffffffff":["deadbeef", 1],
-  "80000000":["cafebabe", 3]},
- "cat",
- ["02  02 01ffffffffdeadbeef00010001 0180000000cafebabe00030003 0004 000000", 4]
+[{"ffffffff":"deadbeef0001",
+  "80000000":"cafebabe0003"},
+ "serialize",
+ ["02  02 01ffffffffdeadbeef0001 0180000000cafebabe0003 00", 4]
 ],
 
 ["First two bits collide"],
-[{"ffffffff":["deadbeef", 1],
-  "c0000000":["cafebabe", 3]},
- "cat",
- ["02  02 0201ffffffffdeadbeef0001000101c0000000cafebabe00030003 0004 000000 0004  000000", 4]
+[{"ffffffff":"deadbeef0001",
+  "c0000000":"cafebabe0003"},
+ "serialize",
+ ["02  02 0201ffffffffdeadbeef000101c0000000cafebabe0003 00 00", 4]
 ],
 
 ["Three items"],
-[{"ffffffff":["deadbeef", 1],
-  "bfffffff":["cafebabe", 3],
-  "00000000":["baadf00d", 5]},
- "cat",
- ["02  02 01ffffffffdeadbeef00010001 01bfffffffcafebabe00030003 0004 0100000000baadf00d00050005", 9]
+[{"ffffffff":"deadbeef0001",
+  "bfffffff":"cafebabe0003",
+  "00000000":"baadf00d0005"},
+ "serialize",
+ ["02  02 01ffffffffdeadbeef0001 01bfffffffcafebabe0003 0100000000baadf00d0005", 9]
 ],
 
 ["Four items"],
-[{"ffffffff":["deadbeef", 1],
-  "bfffffff":["cafebabe", 3],
-  "40000000":["feedface", 5],
-  "00000000":["baadf00d", 7]},
- "cat",
- ["02  02 01ffffffffdeadbeef00010001 01bfffffffcafebabe00030003 0004  02 0140000000feedface00050005 0100000000baadf00d00070007 000c", 16]
+[{"ffffffff":"deadbeef0001",
+  "bfffffff":"cafebabe0003",
+  "40000000":"feedface0005",
+  "00000000":"baadf00d0007"},
+ "serialize",
+ ["02  02 01ffffffffdeadbeef0001 01bfffffffcafebabe0003  02 0140000000feedface0005 0100000000baadf00d0007", 16]
 ],
 
 
-["Above test cases repeated, but with SHA256 rather than concatenation."],
+["Above test cases repeated, but with SHA256 rather than conserializeenation."],
 
 ["Empty"],
 [{},
- "sha256",
- ["6e340b9cffb37a989ca544e6bb780a2c78901d3fb33738768511a30617afa01d", 0]
+ "hash",
+ ["8e2759711e9d839f9b80e70eae03481d411350ee47ccb96f04590b954679cdfd", 0]
 ],
 
 ["Leaf"],
-[{"ffffffff":["deadbeef", 1]},
- "sha256",
- ["1766320162c83183f5219a0278111a665c5481fc18d4df11d24deeb75ed4cd3b", 1]
+[{"ffffffff":"deadbeef0001"},
+ "hash",
+ ["d203a45121c5a1b3cf75931c08ed5a6ff5c7f8b574d1a98df23f99cf1fe6579b", 1]
 ],
 
 ["Inner with left and right leaf children"],
-[{"ffffffff":["deadbeef", 1],
-  "00000000":["cafebabe", 3]},
- "sha256",
- ["ffc2f4524067927d5a69278a476dc495b4f3422fa4de84eedf14b3ea52d89d1b", 4]
+[{"ffffffff":"deadbeef0001",
+  "00000000":"cafebabe0003"},
+ "hash",
+ ["745305cfcf61e12b1c4fc28702f3db47c7166c8684ca47cabdcd90a4379819ff", 4]
 ],
 
 ["Inner with collision on first bit"],
-[{"ffffffff":["deadbeef", 1],
-  "80000000":["cafebabe", 3]},
- "sha256",
- ["2b66492f76d81dbe9eba68a9d9a118ca8c17a64fd538c6b90ca2b55c7d83cb00", 4]
+[{"ffffffff":"deadbeef0001",
+  "80000000":"cafebabe0003"},
+ "hash",
+ ["305cf686476881ebd40efb5848df0ad1da2b3bb9043c20d80c2be5fe5ec0f4b0", 4]
 ],
 
 ["First two bits collide"],
-[{"ffffffff":["deadbeef", 1],
-  "c0000000":["cafebabe", 3]},
- "sha256",
- ["7e2472e9c0fb39743b1ef8816c38ffee9c1a96b3f5ed025fa1a1d3fbac014e70", 4]
+[{"ffffffff":"deadbeef0001",
+  "c0000000":"cafebabe0003"},
+ "hash",
+ ["b6d1846cb039fdb07964a2c3f7b7fb6c2f05f3a086c3268abf55876f85b3a08d", 4]
 ],
 
 ["Three items"],
-[{"ffffffff":["deadbeef", 1],
-  "bfffffff":["cafebabe", 3],
-  "00000000":["baadf00d", 5]},
- "sha256",
- ["cf972b8b1d57bed11d4969697ff651f470626a7cc21fb0340ef1c6189e7ba842", 9]
+[{"ffffffff":"deadbeef0001",
+  "bfffffff":"cafebabe0003",
+  "00000000":"baadf00d0005"},
+ "hash",
+ ["f2e2dc57e62abe8feaba5c69cc44decd6e6a043f3dfe626a975e367a0397dfa4", 9]
 ],
 
 ["Four items"],
-[{"ffffffff":["deadbeef", 1],
-  "bfffffff":["cafebabe", 3],
-  "40000000":["feedface", 5],
-  "00000000":["baadf00d", 7]},
- "sha256",
- ["6cc9d985a9eb00cde4f85390a6f9c1a261817466f19d424f0e309f372bea5f44", 16]
+[{"ffffffff":"deadbeef0001",
+  "bfffffff":"cafebabe0003",
+  "40000000":"feedface0005",
+  "00000000":"baadf00d0007"},
+ "hash",
+ ["86f8099ca2681ad530c90a12099e82d7a96718f08f871a95c2faec2ad551154a", 16]
 ],
 
 ["keep diffs clean"]
