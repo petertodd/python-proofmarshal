@@ -11,12 +11,15 @@
 
 import io
 import unittest
+import uuid
 
 from proofmarshal import *
 from proofmarshal.test import load_test_vectors, x, b2x
 
 class boxed_varuint(ImmutableProof):
     """Dummy object with a single varuint in it"""
+
+    HASH_HMAC_KEY = x('dd2617248e435da6db7c119c17cc19cd')
 
     def __init__(self, i):
         object.__setattr__(self, 'i', i)
@@ -29,6 +32,8 @@ class boxed_varuint(ImmutableProof):
 
 class boxed_bytes(ImmutableProof):
     """Dummy object with a single bytes attribute"""
+
+    HASH_HMAC_KEY = x('f690a4d282810e868a0d7d59578a6585')
     EXPECTED_LENGTH = None
 
     def __init__(self, buf):
@@ -42,6 +47,8 @@ class boxed_bytes(ImmutableProof):
 
 class boxed_objs(ImmutableProof):
     """Object with other objects"""
+
+    HASH_HMAC_KEY = x('296d566c10ebb4b92e8a7f6e909eb191')
 
     def __init__(self, buf, i):
         object.__setattr__(self, 'buf', boxed_bytes(buf))
@@ -90,7 +97,9 @@ class Test_BytesSerializationContext(unittest.TestCase):
 
     def test_objs(self):
         """Test object serialization"""
-        for expected_hex_serialized_bytes, expected_hex_buf, expected_i in load_test_vectors('valid_boxed_objs.json'):
+        for expected_hex_serialized_bytes, expected_hex_buf, expected_i, expected_hex_hash \
+                in load_test_vectors('valid_boxed_objs.json'):
+
             expected_serialized_bytes = x(expected_hex_serialized_bytes)
             expected_buf = x(expected_hex_buf)
 
@@ -123,3 +132,15 @@ class Test_JsonSerializationContext(unittest.TestCase):
 
             actual_json = boxed_bytes(actual_value).json_serialize()
             self.assertEqual({'buf':expected_json_value}, actual_json)
+
+class Test_HashSerializationContext(unittest.TestCase):
+    def test_objs(self):
+        """Test object hashing"""
+        for expected_hex_serialized_bytes, expected_hex_buf, expected_i, expected_hex_hash \
+                in load_test_vectors('valid_boxed_objs.json'):
+
+            expected_buf = x(expected_hex_buf)
+            expected_hash = x(expected_hex_hash)
+
+            actual_hash = boxed_objs(expected_buf, expected_i).hash
+            self.assertEqual(b2x(expected_hash), b2x(actual_hash))

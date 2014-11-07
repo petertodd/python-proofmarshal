@@ -1,6 +1,6 @@
 [
-["0000", "", 0],
-["04deadbeef8001", "deadbeef", 128],
+["0000", "", 0, "33dc0b2bf8c5d3676339872a83889aeb18777dc0bab337db37aeb5cfad659aae"],
+["04deadbeef8001", "deadbeef", 128, "ceb083636508dba4d21bbee70d0a4f625c0c119df86d4bde1a9a3bbf5565cb41"],
 
 ["make diffs clean"]
 ]

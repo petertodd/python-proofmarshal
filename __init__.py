@@ -11,6 +11,7 @@
 
 import binascii
 import hashlib
+import hmac
 import io
 
 """Cryptographic proof marshalling
@@ -159,12 +160,28 @@ class JsonDeserializationContext:
     def read_bytes(self, attr_name, expected_length):
         return binascii.unhexlify(self.pairs[attr_name].encode('utf8'))
 
-class HashSerializationContext:
+class HashSerializationContext(BytesSerializationContext):
     """Serialization context for calculating hashes of objects
 
     Serialization is never recursive in this context; when encountering an
     object its hash is used instead.
     """
+
+    def write_bytes(self, attr_name, value, expected_length=None):
+        # FIXME: should we write the bytes themselves, or the hash of the bytes?
+        if expected_length is None:
+            self.write_varuint(None, len(value))
+        else:
+            # FIXME: proper exception
+            assert len(value) == expected_length
+        self.fd.write(value)
+
+    def write_obj(self, attr_name, value, serialization_class=None):
+        assert serialization_class is None
+
+        hash = value.hash
+        assert len(hash) == 32
+        self.write_bytes(None, hash, 32)
 
 class ImmutableProof:
     """Base class for immutable proof objects
@@ -172,6 +189,8 @@ class ImmutableProof:
 
     """
     __slots__ = []
+
+    HASH_HMAC_KEY = None
 
     def __setattr__(self, name, value):
         raise AttributeError('Object is immutable')
@@ -211,3 +230,16 @@ class ImmutableProof:
         """Serialize from JSON-compatible attribute-value pairs"""
         ctx = JsonDeserializationContext(pairs)
         return cls.ctx_deserialize(ctx)
+
+    def calc_hash(self):
+        ctx = HashSerializationContext()
+        self.ctx_serialize(ctx)
+        return hmac.HMAC(self.HASH_HMAC_KEY, ctx.getbytes(), hashlib.sha256).digest()
+
+    @property
+    def hash(self):
+        try:
+            return self._cached_hash
+        except AttributeError:
+            object.__setattr__(self, '_cached_hash', self.calc_hash())
+            return self._cached_hash
