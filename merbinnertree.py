@@ -62,7 +62,7 @@ class MerbinnerTree(proofmarshal.ImmutableProof, dict):
                 for key, value, sum in items:
                     # FIXME: detect dup keys here
                     keyhash = self.key_gethash(key)
-                    side = key[depth // 8] >> (7 - depth % 8) & 0b1
+                    side = keyhash[depth // 8] >> (7 - depth % 8) & 0b1
 
                     if side:
                         left_items.append((key, value, sum))
