@@ -29,10 +29,8 @@ class MerbinnerTree(proofmarshal.ImmutableProof, dict):
     value_serialize = None
     value_deserialize = None
     sum_serialize = lambda self, ctx, sum: None
-    sum_deserialize = lambda self, ctx, sum: 0
 
     key_gethash = lambda self, key: key.hash
-    value_gethash = lambda self, value: value.hash
     value_getsum = lambda self, value: 0
 
     sum_func = operator.add

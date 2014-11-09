@@ -34,7 +34,6 @@ class BytesBytesMerbinnerTree(MerbinnerTree):
     value_deserialize = lambda self, ctx: ctx.read_bytes('value', self.VALUE_LENGTH)
 
     key_gethash = lambda self, key: key
-    value_gethash = lambda self, value: value
 
 
 class Test_MerbinnerTree(unittest.TestCase):
@@ -99,7 +98,6 @@ class SummedBytesBytesMerbinnerTree(BytesBytesMerbinnerTree):
     VALUE_LENGTH = 6
 
     sum_serialize = lambda self, ctx, sum: ctx.write_bytes('sum', sum_struct.pack(sum), sum_struct.size)
-    sum_deserialize = lambda self, ctx, sum: sum_struct.unpack(ctx.read_bytes('sum', sum_struct.size))[0]
 
     value_getsum = lambda self, value: sum_struct.unpack(value[-2:])[0]
 
