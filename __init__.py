@@ -58,7 +58,7 @@ class DeserializationContext:
 
 class StreamSerializationContext(SerializationContext):
     def __init__(self, fd):
-        self.fd = io.BytesIO()
+        self.fd = fd
 
     def write_varuint(self, attr_name, value):
         # unsigned little-endian base128 format (LEB128)
@@ -212,6 +212,17 @@ class ImmutableProof:
         ctx = BytesSerializationContext()
         self.ctx_serialize(ctx)
         return ctx.getbytes()
+
+    @classmethod
+    def stream_deserialize(cls, fd):
+        """Deserialize from a stream"""
+        ctx = StreamDeserializationContext(fd)
+        return cls.ctx_deserialize(ctx)
+
+    def stream_serialize(self, fd):
+        """Serialize to a stream"""
+        ctx = StreamSerializationContext(fd)
+        self.ctx_serialize(ctx)
 
     @classmethod
     def deserialize(cls, buf):
