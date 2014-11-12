@@ -177,11 +177,74 @@ class HashSerializationContext(BytesSerializationContext):
         self.fd.write(value)
 
     def write_obj(self, attr_name, value, serialization_class=None):
-        assert serialization_class is None
+        hash = None
+        if serialization_class is None:
+            hash = value.hash
 
-        hash = value.hash
+        else:
+            hash = serialization_class.calc_hash(value)
+
         assert len(hash) == 32
         self.write_bytes(None, hash, 32)
+
+class Serializer:
+    """Serializes an instance of a class"""
+
+    HASH_HMAC_KEY = None
+
+    @classmethod
+    def ctx_serialize(cls, self, ctx):
+        """Serialize to a serialization context"""
+        raise NotImplementedError
+
+    @classmethod
+    def ctx_deserialize(cls, ctx):
+        """Deserialize from a serialization context"""
+        raise NotImplementedError
+
+    @classmethod
+    def serialize(cls, self):
+        """Serialize to bytes"""
+        ctx = BytesSerializationContext()
+        self.ctx_serialize(ctx)
+        return ctx.getbytes()
+
+    @classmethod
+    def stream_deserialize(cls, fd):
+        """Deserialize from a stream"""
+        ctx = StreamDeserializationContext(fd)
+        return cls.ctx_deserialize(ctx)
+
+    @classmethod
+    def stream_serialize(cls, self, fd):
+        """Serialize to a stream"""
+        ctx = StreamSerializationContext(fd)
+        self.ctx_serialize(ctx)
+
+    @classmethod
+    def deserialize(cls, buf):
+        """Deserialize from bytes"""
+        ctx = BytesDeserializationContext(buf)
+        return cls.ctx_deserialize(ctx)
+
+    @classmethod
+    def json_serialize(cls, self):
+        """Serialize to JSON-compatible attribute-value pairs"""
+        ctx = JsonSerializationContext()
+        self.ctx_serialize(ctx)
+        return ctx.pairs
+
+    @classmethod
+    def json_deserialize(cls, pairs):
+        """Serialize from JSON-compatible attribute-value pairs"""
+        ctx = JsonDeserializationContext(pairs)
+        return cls.ctx_deserialize(ctx)
+
+    @classmethod
+    def calc_hash(cls, self):
+        ctx = HashSerializationContext()
+        cls.ctx_serialize(self, ctx)
+        return hmac.HMAC(cls.HASH_HMAC_KEY, ctx.getbytes(), hashlib.sha256).digest()
 
 class ImmutableProof:
     """Base class for immutable proof objects
